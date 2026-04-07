@@ -24,4 +24,8 @@ dist/
 # Wrangler 本地数据
 .wrangler/
 
-# 旧的 Next.js 文件（重构后可清理）
+# AI 助手记忆库（含私人配置、密码等，禁止推送）
+.agents/
+
+# package-lock.json（根目录，工作区级别，不追踪）
+/package-lock.json
