@@ -21,9 +21,12 @@ export async function createDatabase(env: Record<string, unknown>): Promise<IDat
   const provider = (env.DB_PROVIDER as string) || "d1";
 
   switch (provider) {
-    case "d1":
+    case "d1": {
       if (!env.DB) throw new Error("缺少 D1 数据库绑定 (env.DB)");
-      return new D1Adapter(env.DB as D1Database);
+      const d1Adapter = new D1Adapter(env.DB as D1Database);
+      await d1Adapter.ensureSchema();
+      return d1Adapter;
+    }
 
     case "turso": {
       const url = env.TURSO_URL as string;

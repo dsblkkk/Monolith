@@ -106,7 +106,31 @@ export function PostPage() {
 
           <Separator className="mb-[32px] bg-border/30" />
 
-          <div className="prose-monolith animate-fade-in delay-3" dangerouslySetInnerHTML={{ __html: htmlContent }} />
+          {/* 文章正文，同时处理代码块复制逻辑 */}
+          <div 
+            className="prose-monolith animate-fade-in delay-3" 
+            dangerouslySetInnerHTML={{ __html: htmlContent }} 
+            onClick={(e) => {
+              const target = e.target as HTMLElement;
+              const btn = target.closest('.copy-code-btn');
+              if (btn) {
+                const wrapper = btn.closest('.code-block-wrapper');
+                const codeNode = wrapper?.querySelector('code');
+                if (codeNode && codeNode.textContent) {
+                  navigator.clipboard.writeText(codeNode.textContent).then(() => {
+                    const originalIcon = btn.getAttribute('data-copy-icon');
+                    const checkIcon = btn.getAttribute('data-check-icon');
+                    if (checkIcon && originalIcon) {
+                      btn.innerHTML = checkIcon;
+                      setTimeout(() => {
+                        btn.innerHTML = originalIcon;
+                      }, 2000);
+                    }
+                  }).catch(console.error);
+                }
+              }
+            }}
+          />
 
           <Separator className="mt-[48px] bg-border/30" />
           <div className="mt-[24px] flex items-center justify-between animate-fade-in delay-4">

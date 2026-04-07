@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Separator } from "@/components/ui/separator";
 import { fetchComments, submitComment, type CommentData } from "@/lib/api";
-import { MessageCircle, Send, User } from "lucide-react";
+import { MessageCircle, Send, User, ChevronDown, ChevronUp } from "lucide-react";
 
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString("zh-CN", {
@@ -169,7 +169,9 @@ function CommentForm({ slug, onSubmitted }: { slug: string; onSubmitted: () => v
 export function CommentsSection({ slug }: { slug: string }) {
   const [comments, setComments] = useState<CommentData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
+  // 初次仍然加载以获取评论数量
   const loadComments = useCallback(() => {
     fetchComments(slug)
       .then(setComments)
@@ -183,44 +185,72 @@ export function CommentsSection({ slug }: { slug: string }) {
 
   return (
     <section className="mt-[40px] animate-fade-in delay-5">
-      <div className="flex items-center gap-[8px] mb-[20px]">
-        <MessageCircle className="h-[18px] w-[18px] text-muted-foreground/60" />
-        <h2 className="text-[16px] font-semibold text-foreground">
-          评论{comments.length > 0 && <span className="ml-[4px] text-[14px] font-normal text-muted-foreground/50">({comments.length})</span>}
-        </h2>
-      </div>
+      <div className="rounded-xl border border-border/40 bg-card/10 overflow-hidden transition-all duration-300">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-full flex items-center justify-between p-[16px] md:px-[20px] bg-transparent hover:bg-card/30 transition-colors"
+          title={isOpen ? "收起评论区" : "展开评论区"}
+        >
+          <div className="flex items-center gap-[8px]">
+            <MessageCircle className="h-[18px] w-[18px] text-muted-foreground/60" />
+            <h2 className="text-[16px] font-semibold text-foreground">
+              评论区{!loading && comments.length > 0 && <span className="ml-[6px] text-[14px] font-normal text-muted-foreground/50">({comments.length})</span>}
+            </h2>
+          </div>
+          <div className="flex items-center gap-[6px] text-[13px] text-muted-foreground/50">
+            {isOpen ? (
+              <>
+                <span className="hidden sm:inline">收起评论</span>
+                <ChevronUp className="h-[16px] w-[16px]" />
+              </>
+            ) : (
+              <>
+                <span className="hidden sm:inline">
+                  {loading ? "加载中..." : comments.length > 0 ? "点击展开" : "留个言吧"}
+                </span>
+                <ChevronDown className="h-[16px] w-[16px]" />
+              </>
+            )}
+          </div>
+        </button>
 
-      {/* 评论列表 */}
-      {loading ? (
-        <div className="space-y-[12px]">
-          {[1, 2].map((i) => (
-            <div key={i} className="flex gap-[12px]">
-              <div className="h-[36px] w-[36px] rounded-full bg-card/30 animate-pulse" />
-              <div className="flex-1 space-y-[6px]">
-                <div className="h-[14px] w-[120px] rounded bg-card/20 animate-pulse" />
-                <div className="h-[14px] w-full rounded bg-card/20 animate-pulse" />
+        {/* 展开内容区域 */}
+        {isOpen && (
+          <div className="animate-fade-in-down border-t border-border/20 p-[16px] md:px-[20px] md:pb-[24px]">
+            {/* 评论列表 */}
+            {loading ? (
+              <div className="space-y-[12px]">
+                {[1, 2].map((i) => (
+                  <div key={i} className="flex gap-[12px]">
+                    <div className="h-[36px] w-[36px] rounded-full bg-card/30 animate-pulse" />
+                    <div className="flex-1 space-y-[6px]">
+                      <div className="h-[14px] w-[120px] rounded bg-card/20 animate-pulse" />
+                      <div className="h-[14px] w-full rounded bg-card/20 animate-pulse" />
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-          ))}
-        </div>
-      ) : comments.length > 0 ? (
-        <div className="divide-y divide-border/20">
-          {comments.map((c) => (
-            <CommentItem key={c.id} comment={c} />
-          ))}
-        </div>
-      ) : (
-        <div className="flex flex-col items-center justify-center py-[32px] text-center">
-          <User className="h-[32px] w-[32px] text-muted-foreground/20 mb-[8px]" />
-          <p className="text-[14px] text-muted-foreground/40">还没有评论，来做第一个留言的人吧</p>
-        </div>
-      )}
+            ) : comments.length > 0 ? (
+              <div className="divide-y divide-border/20">
+                {comments.map((c) => (
+                  <CommentItem key={c.id} comment={c} />
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-[24px] text-center">
+                <User className="h-[32px] w-[32px] text-muted-foreground/20 mb-[8px]" />
+                <p className="text-[14px] text-muted-foreground/40">还没有评论，来做第一个留言的人吧</p>
+              </div>
+            )}
 
-      <Separator className="my-[24px] bg-border/20" />
+            <Separator className="my-[24px] bg-border/20" />
 
-      {/* 评论表单 */}
-      <h3 className="mb-[12px] text-[14px] font-medium text-muted-foreground/60">发表评论</h3>
-      <CommentForm slug={slug} onSubmitted={loadComments} />
+            {/* 评论表单 */}
+            <h3 className="mb-[12px] text-[14px] font-medium text-muted-foreground/60">发表评论</h3>
+            <CommentForm slug={slug} onSubmitted={loadComments} />
+          </div>
+        )}
+      </div>
     </section>
   );
 }

@@ -16,9 +16,27 @@ type DrizzleD1 = ReturnType<typeof drizzle>;
 
 export class D1Adapter implements IDatabase {
   private db: DrizzleD1;
+  private schemaReady: Promise<void> | null = null;
 
   constructor(d1: D1Database) {
     this.db = drizzle(d1);
+  }
+
+  /**
+   * 确保数据库 schema 完整（动态补全所有后添加的列和表）
+   * 在工厂创建实例后立即调用
+   */
+  async ensureSchema(): Promise<void> {
+    if (!this.schemaReady) {
+      this.schemaReady = (async () => {
+        await this.ensureViewCountColumn();
+        await this.ensurePinnedColumn();
+        await this.ensureSettingsTable();
+        await this.ensurePagesTable();
+        await this.ensureCommentsTable();
+      })();
+    }
+    await this.schemaReady;
   }
 
   /* ── 内部辅助 ─────────────────── */

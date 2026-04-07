@@ -52,7 +52,7 @@ export function HomePage() {
             <AnimateIn animation="animate-fade-in" delay="delay-2">
               <div className="rounded-lg border border-border/40 bg-card/30 p-[20px]">
                 <div className="mb-[12px] flex items-center gap-[12px]">
-                  <div className="flex h-[36px] w-[36px] items-center justify-center rounded-full bg-gradient-to-br from-blue-500/30 to-purple-500/30 text-[14px] font-semibold text-foreground">M</div>
+                  <div className="flex h-[36px] w-[36px] items-center justify-center rounded-full bg-gradient-to-br from-blue-500/30 to-cyan-500/30 text-[14px] font-semibold text-foreground">M</div>
                   <div>
                     <p className="text-[14px] font-semibold text-foreground">Monolith</p>
                     <p className="text-[12px] text-muted-foreground/60">独立开发者</p>

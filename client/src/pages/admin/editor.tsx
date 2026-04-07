@@ -113,7 +113,7 @@ export function AdminEditor() {
     title: "",
     content: "",
     excerpt: "",
-    coverColor: "from-blue-500/20 to-cyan-500/20",
+    coverColor: "from-cyan-500/20 to-blue-600/20",
     tags: "",
     published: true,
     pinned: false,
@@ -348,12 +348,12 @@ export function AdminEditor() {
   ];
 
   const colorPresets = [
-    { label: "蓝青", value: "from-blue-500/20 to-cyan-500/20" },
-    { label: "紫粉", value: "from-purple-500/20 to-pink-500/20" },
-    { label: "翠绿", value: "from-emerald-500/20 to-teal-500/20" },
-    { label: "橙黄", value: "from-orange-500/20 to-amber-500/20" },
-    { label: "红玫", value: "from-red-500/20 to-rose-500/20" },
-    { label: "靛蓝", value: "from-indigo-500/20 to-blue-500/20" },
+    { label: "赛博青", value: "from-cyan-500/20 to-blue-600/20" },
+    { label: "冷翡翠", value: "from-emerald-500/20 to-teal-600/20" },
+    { label: "深海蓝", value: "from-indigo-500/20 to-blue-700/20" },
+    { label: "琥珀金", value: "from-amber-500/20 to-orange-600/20" },
+    { label: "钛金灰", value: "from-zinc-500/20 to-slate-500/20" },
+    { label: "石板墨", value: "from-slate-600/20 to-gray-700/20" },
   ];
 
   return (

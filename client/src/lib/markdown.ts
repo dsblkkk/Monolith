@@ -57,19 +57,62 @@ renderer.heading = ({ text, depth }: { text: string; depth: number }) => {
   return `<h${depth} id="${id}">${text}</h${depth}>`;
 };
 
-// 代码块：高亮 + 语言标签
+// 代码块：高亮 + 语言标签 + 复制按钮
 renderer.code = ({ text, lang }: { text: string; lang?: string }) => {
   const language = lang && hljs.getLanguage(lang) ? lang : "";
   const highlighted = language
     ? hljs.highlight(text, { language }).value
     : escapeHtml(text);
   const langLabel = language ? `<span class="code-lang">${language}</span>` : "";
-  return `<pre class="hljs">${langLabel}<code class="hljs language-${language || "text"}">${highlighted}</code></pre>`;
+  
+  const copyIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`;
+  const checkIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-400"><path d="M20 6 9 17l-5-5"/></svg>`;
+
+  return `<div class="code-block-wrapper relative group">
+    <button class="copy-code-btn absolute top-2 right-2 flex items-center justify-center p-1.5 rounded-md border border-border/40 bg-card/60 text-muted-foreground transition-all duration-200 hover:text-foreground hover:bg-card hover:border-border/80 opacity-40 hover:opacity-100 group-hover:opacity-100 z-10" aria-label="复制代码" data-copy-icon='${copyIcon}' data-check-icon='${checkIcon}'>
+      ${copyIcon}
+    </button>
+    <pre class="hljs">${langLabel}<code class="hljs language-${language || "text"}">${highlighted}</code></pre>
+  </div>`;
 };
 
-// 图片：懒加载 + 圆角
+// 图片/视频：懒加载 + 圆角 + 视频解析
 renderer.image = ({ href, title, text }: { href: string; title?: string | null; text: string }) => {
   const titleAttr = title ? ` title="${escapeHtml(title)}"` : "";
+  
+  // 1. 直链视频支持
+  if (href.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/i)) {
+    return `<figure class="md-figure md-video">
+      <video src="${href}" controls playsinline preload="metadata" class="w-full rounded-lg border border-border/20 shadow-lg bg-black/5"></video>
+      ${text ? `<figcaption>${escapeHtml(text)}</figcaption>` : ""}
+    </figure>`;
+  }
+
+  // 2. 哔哩哔哩 (Bilibili) 视频支持解析
+  const bpxMatch = href.match(/bilibili\.com\/video\/([a-zA-Z0-9]+)/i);
+  if (bpxMatch) {
+    const bvid = bpxMatch[1];
+    return `<figure class="md-figure md-video">
+      <div class="relative w-full aspect-video rounded-lg overflow-hidden border border-border/20 shadow-lg">
+        <iframe src="//player.bilibili.com/player.html?bvid=${bvid}&page=1&high_quality=1&danmaku=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" class="absolute inset-0 w-full h-full"></iframe>
+      </div>
+      ${text ? `<figcaption>${escapeHtml(text)}</figcaption>` : ""}
+    </figure>`;
+  }
+
+  // 3. YouTube 视频支持解析
+  const ytMatch = href.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/i);
+  if (ytMatch) {
+    const ytid = ytMatch[1];
+    return `<figure class="md-figure md-video">
+      <div class="relative w-full aspect-video rounded-lg overflow-hidden border border-border/20 shadow-lg">
+        <iframe src="https://www.youtube.com/embed/${ytid}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="absolute inset-0 w-full h-full"></iframe>
+      </div>
+      ${text ? `<figcaption>${escapeHtml(text)}</figcaption>` : ""}
+    </figure>`;
+  }
+
+  // 默认图片渲染
   return `<figure class="md-figure"><img src="${href}" alt="${escapeHtml(text)}" loading="lazy" decoding="async"${titleAttr}/>${text ? `<figcaption>${escapeHtml(text)}</figcaption>` : ""}</figure>`;
 };
 
