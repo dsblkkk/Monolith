@@ -9,6 +9,7 @@ import { ArrowLeft, Eye } from "lucide-react";
 import { TableOfContents, ReadingProgressBar } from "@/components/toc";
 import { SeoHead } from "@/components/seo-head";
 import { CommentsSection } from "@/components/comments";
+import { RelatedPosts } from "@/components/related-posts";
 
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString("zh-CN", { year: "numeric", month: "long", day: "numeric" });
@@ -143,6 +144,9 @@ export function PostPage() {
             </Link>
             <span className="text-[12px] text-muted-foreground/40">发布于 {formatDate(post.createdAt)}</span>
           </div>
+
+          {/* 相关推荐 */}
+          <RelatedPosts currentSlug={post.slug} currentTags={post.tags} />
 
           {/* 评论区 */}
           <CommentsSection slug={post.slug} />
