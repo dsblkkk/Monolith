@@ -102,7 +102,9 @@ app.get("/api/posts", async (c) => {
 app.get("/api/search", async (c) => {
   const query = c.req.query("q") || "";
   if (!query.trim()) return c.json([]);
-  const limit = Math.min(parseInt(c.req.query("limit") || "20"), 50);
+  let limit = parseInt(c.req.query("limit") || "20", 10);
+  if (isNaN(limit) || limit <= 0) limit = 20;
+  limit = Math.min(limit, 50);
   const db = c.get("db");
   const results = await db.searchPosts(query.trim(), limit);
   return c.json(results);
@@ -492,7 +494,8 @@ app.get("/api/admin/stats", async (c) => {
 
 // 访客分析数据
 app.get("/api/admin/analytics", async (c) => {
-  const days = parseInt(c.req.query("days") || "7", 10);
+  let days = parseInt(c.req.query("days") || "7", 10);
+  if (isNaN(days) || days <= 0) days = 7;
   const db = c.get("db");
   const analytics = await db.getAnalytics(Math.min(days, 90));
   return c.json(analytics);
@@ -562,7 +565,9 @@ app.post("/api/admin/posts/:slug/versions/:id/restore", async (c) => {
   const slug = c.req.param("slug");
   const idStr = c.req.param("id");
   const db = c.get("db");
-  const post = await db.restorePostVersion(slug, parseInt(idStr));
+  const versionId = parseInt(idStr);
+  if (isNaN(versionId)) return c.json({ error: "无效的快照 ID" }, 400);
+  const post = await db.restorePostVersion(slug, versionId);
   if (!post) return c.json({ error: "恢复失败，版本或文章不存在" }, 400);
   // 恢复后也可以自动创建一个新快照
   await db.createPostVersion(slug);
@@ -637,8 +642,14 @@ app.post("/api/admin/posts/:slug/localize-images", async (c) => {
 
   for (const url of externalUrls) {
     try {
-      const resp = await fetch(url, { headers: { "User-Agent": "Monolith-Bot/1.0" } });
+      const abortCtrl = new AbortController();
+      const timeoutId = setTimeout(() => abortCtrl.abort(), 10000); // 10秒超时
+      const resp = await fetch(url, { headers: { "User-Agent": "Monolith-Bot/1.0" }, signal: abortCtrl.signal });
+      clearTimeout(timeoutId);
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+
+      const contentLength = resp.headers.get("content-length");
+      if (contentLength && parseInt(contentLength) > 10 * 1024 * 1024) throw new Error("图片超过 10MB 限制");
 
       const contentType = resp.headers.get("content-type") || "image/png";
       const ext = contentType.includes("jpeg") || contentType.includes("jpg") ? "jpg"
