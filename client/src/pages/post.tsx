@@ -180,19 +180,19 @@ export function PostPage() {
       >
         {/* 主内容区 */}
         <article className="post-content py-[32px] lg:py-[56px]">
-          <Link href="/" className="mb-[32px] inline-flex items-center gap-[6px] text-[13px] text-muted-foreground/60 transition-all duration-200 hover:text-foreground hover:-translate-x-[2px] animate-fade-in">
-            <ArrowLeft className="h-[14px] w-[14px]" />返回首页
-          </Link>
-
-          {/* 进入阅读模式按钮 */}
-          <button
-            onClick={toggleReadingMode}
-            className="reading-mode-toggle mb-[24px] inline-flex items-center gap-[6px] rounded-full border border-border/30 bg-card/40 px-[14px] py-[6px] text-[12px] text-muted-foreground/60 transition-all duration-300 hover:bg-card hover:text-foreground hover:border-border/60 animate-fade-in"
-            title="进入专注阅读模式"
-          >
-            <BookOpen className="h-[14px] w-[14px]" />
-            阅读模式
-          </button>
+          <div className="mb-[32px] flex items-center justify-between animate-fade-in">
+            <Link href="/" className="inline-flex items-center gap-[6px] text-[13px] text-muted-foreground/60 transition-all duration-200 hover:text-foreground hover:-translate-x-[2px]">
+              <ArrowLeft className="h-[14px] w-[14px]" />返回首页
+            </Link>
+            <button
+              onClick={toggleReadingMode}
+              className="reading-mode-toggle inline-flex items-center gap-[5px] text-[12px] text-muted-foreground/40 transition-all duration-200 hover:text-foreground/70"
+              title="进入专注阅读模式"
+            >
+              <BookOpen className="h-[13px] w-[13px]" />
+              专注阅读
+            </button>
+          </div>
 
           <header className="mb-[32px] animate-fade-in-up delay-1">
             <div className={`mb-[24px] h-[3px] w-[60px] rounded-full bg-gradient-to-r ${post.coverColor || "from-gray-500/20 to-gray-600/20"}`} />
