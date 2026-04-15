@@ -12,11 +12,12 @@
     "dev:server": "npm -w monolith-server run dev",
     "build": "npm -w monolith-client run build",
     "deploy:server": "npm -w monolith-server run deploy",
-    "deploy:client": "npx wrangler pages deploy client/dist",
+    "deploy:client": "node -e \"const {spawnSync}=require('node:child_process'); const result=spawnSync('npx',['wrangler','pages','deploy','dist','--project-name','monolith-client','--branch','main','--commit-dirty=true'],{cwd:'client',stdio:'inherit',shell:process.platform==='win32'}); process.exit(result.status ?? 1);\"",
     "deploy:cloudflare": "node scripts/deploy-cloudflare.mjs",
     "db:migrate:local": "npm -w monolith-server run db:migrate:local",
     "db:migrate:remote": "npm -w monolith-server run db:migrate:remote",
-    "db:seed:local": "npm -w monolith-server run db:seed:local"
+    "db:seed:local": "npm -w monolith-server run db:seed:local",
+    "db:seed:test-posts:local": "npm -w monolith-server run db:seed:test-posts:local"
   },
   "devDependencies": {
     "concurrently": "^9.0.0"

@@ -2,6 +2,7 @@ import { spawnSync } from "node:child_process";
 import process from "node:process";
 
 const projectRoot = process.cwd();
+const clientRoot = `${projectRoot}/client`;
 
 function parseArgs(argv) {
   const options = {
@@ -55,7 +56,7 @@ function parseArgs(argv) {
 function runStep(title, command, args, extra = {}) {
   console.log(`\n==> ${title}`);
   const result = spawnSync(command, args, {
-    cwd: projectRoot,
+    cwd: extra.cwd || projectRoot,
     stdio: extra.input ? ["pipe", "inherit", "inherit"] : "inherit",
     input: extra.input,
     encoding: "utf8",
@@ -92,7 +93,17 @@ function resolvePagesEnv(branch) {
   return branch === "main" ? "production" : "preview";
 }
 
+function printPrerequisiteHints() {
+  if (!process.env.CLOUDFLARE_API_TOKEN) {
+    console.warn("[warn] 未检测到 CLOUDFLARE_API_TOKEN，当前依赖本机 wrangler 已登录状态。");
+  }
+  if (!process.env.CLOUDFLARE_ACCOUNT_ID) {
+    console.warn("[warn] 未检测到 CLOUDFLARE_ACCOUNT_ID，如在 GitHub Actions 中运行请务必配置该变量。");
+  }
+}
+
 const options = parseArgs(process.argv.slice(2));
+printPrerequisiteHints();
 
 if (!options.skipMigrate) {
   runStep("应用远程数据库迁移", "npm", ["run", "db:migrate:remote"]);
@@ -131,7 +142,7 @@ if (!options.skipClient) {
     "--branch",
     options.branch,
     "--commit-dirty=true",
-  ]);
+  ], { cwd: clientRoot });
 }
 
 console.log("\n部署流程完成。");

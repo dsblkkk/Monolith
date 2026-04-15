@@ -1,0 +1,83 @@
+name: Cloudflare Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 部署到哪个 Pages 分支
+        required: true
+        default: main
+        type: choice
+        options:
+          - main
+          - dev
+      skip_migrate:
+        description: 跳过远程数据库迁移
+        required: true
+        default: false
+        type: boolean
+      skip_server:
+        description: 跳过 Workers 部署
+        required: true
+        default: false
+        type: boolean
+      skip_client:
+        description: 跳过 Pages 前端部署
+        required: true
+        default: false
+        type: boolean
+      api_base:
+        description: 手动指定 API_BASE（可留空自动探测）
+        required: false
+        type: string
+  push:
+    branches:
+      - main
+    paths:
+      - client/**
+      - server/**
+      - scripts/deploy-cloudflare.mjs
+      - package.json
+      - package-lock.json
+      - .github/workflows/deploy-cloudflare.yml
+
+concurrency:
+  group: cloudflare-deploy-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy Monolith to Cloudflare
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      MONOLITH_API_BASE: ${{ github.event.inputs.api_base || '' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Deploy via scripted pipeline
+        run: |
+          args=(--pages-project monolith-client --branch "${TARGET_BRANCH}")
+          if [ "${SKIP_MIGRATE}" = "true" ]; then args+=(--skip-migrate); fi
+          if [ "${SKIP_SERVER}" = "true" ]; then args+=(--skip-server); fi
+          if [ "${SKIP_CLIENT}" = "true" ]; then args+=(--skip-client); fi
+          if [ -n "${MONOLITH_API_BASE}" ]; then args+=(--api-base "${MONOLITH_API_BASE}"); fi
+          npm run deploy:cloudflare -- "${args[@]}"
+        env:
+          TARGET_BRANCH: ${{ github.event.inputs.branch || 'main' }}
+          SKIP_MIGRATE: ${{ github.event.inputs.skip_migrate || 'false' }}
+          SKIP_SERVER: ${{ github.event.inputs.skip_server || 'false' }}
+          SKIP_CLIENT: ${{ github.event.inputs.skip_client || 'false' }}

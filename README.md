@@ -117,7 +117,7 @@ cd client && npm run dev      # → http://localhost:5173
 2. 部署 Workers 后端
 3. 自动提取最新的 Workers `workers.dev` 地址
 4. 把该地址写入 Cloudflare Pages 项目的 `API_BASE`
-5. 构建并部署 Pages 前端
+5. 从 `client/` 目录部署 Pages 前端，并自动带上 `client/functions/` 的 Functions bundle
 
 执行命令：
 
@@ -143,6 +143,38 @@ npm run deploy:cloudflare -- --skip-client --api-base https://your-worker.your-a
 ```
 
 这个流程的设计目标，是避免部署后出现“前端已经上线，但 Pages Functions 还在指向默认后端”导致的发文保存失败、无法创建页面等问题。
+
+### GitHub Actions 自动部署
+
+仓库现已额外提供工作流：`.github/workflows/deploy-cloudflare.yml`
+
+它支持两种触发方式：
+
+1. `push` 到 `main` 时自动部署
+2. Actions 面板手动触发 `Cloudflare Deploy`
+
+需要在 GitHub Secrets 中配置：
+
+```text
+CLOUDFLARE_API_TOKEN
+CLOUDFLARE_ACCOUNT_ID
+```
+
+手动触发时可选参数：
+
+- `branch`：部署到 `main` 或 `dev`
+- `skip_migrate`
+- `skip_server`
+- `skip_client`
+- `api_base`
+
+这条 Actions 链路底层复用了 `npm run deploy:cloudflare`，不会出现“本地脚本和 CI 工作流行为不一致”的双轨漂移。
+
+### 部署防呆说明
+
+- `seed_test_posts.sql` 已从生产迁移目录移出，改为本地专用的 `server/src/seeds/seed_test_posts.sql`
+- 测试文章只允许通过 `npm run db:seed:test-posts:local` 手动写入本地数据库
+- 生产远程迁移只会读取 `server/src/migrations/` 下的正式迁移文件
 
 部署完成后，建议立即验证：
 
