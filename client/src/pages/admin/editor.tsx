@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { fetchPost, createPost, updatePost, uploadImage, localizePostImages, fetchPostVersions, restorePostVersion, type PostVersion } from "@/lib/api";
 import { renderMarkdown } from "@/lib/markdown";
-import { Save, Eye, EyeOff, Upload, Image, ChevronDown, ChevronUp, Bold, Italic, Heading2, Heading3, Link2, Code, Quote, List, ListOrdered, Minus, Maximize2, Minimize2, Table, CheckSquare, FileCode, ImageDown, History, Check, X, ArrowDownUp, PanelRightClose, PanelRight } from "lucide-react";
+import { Save, Eye, EyeOff, Upload, Image, ChevronDown, ChevronUp, Bold, Italic, Heading2, Heading3, Link2, Code, Quote, List, ListOrdered, Minus, Maximize2, Minimize2, Table, CheckSquare, FileCode, ImageDown, History, Check, X, ArrowDownUp, PanelRightClose, PanelRight, ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
 import Editor, { type Monaco } from "@monaco-editor/react";
 import type * as MonacoTypes from "monaco-editor";
@@ -465,6 +465,13 @@ export function AdminEditor() {
       {/* ─── 顶栏 ─── */}
       <div className="mb-[12px] flex items-center justify-between shrink-0">
         <div className="flex items-center gap-[12px]">
+          <button
+            type="button"
+            onClick={() => setLocation("/admin")}
+            className="inline-flex items-center gap-[5px] h-[30px] px-[10px] rounded-md border border-border/20 bg-card/10 text-[12px] text-muted-foreground/60 hover:text-foreground hover:bg-card/20 transition-colors"
+          >
+            <ArrowLeft className="h-[12px] w-[12px]" />返回
+          </button>
           <span className="text-[11px] text-muted-foreground/35 font-mono">{wordCount} 字</span>
           {lastSaved && (
             <>
