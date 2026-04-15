@@ -91,7 +91,7 @@ function convertHaloData(data: any): ImportResult {
       tagCount: tags.length,
       categoryCount: catMap.size,
       commentCount,
-      postTitles: posts.slice(0, 20).map((p) => ({
+      postTitles: posts.slice(0, 20).map((p: { title: string; slug: string }) => ({
         title: p.title,
         slug: p.slug,
       })),

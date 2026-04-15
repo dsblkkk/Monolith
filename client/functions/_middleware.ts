@@ -1,3 +1,5 @@
+import { getBackendUrl } from "./_shared";
+
 // Cloudflare Pages Function — 爬虫预渲染中间件
 // 拦截社交平台/搜索引擎爬虫，注入文章专属 OG 标签
 // 普通用户请求不受影响，直接返回 SPA
@@ -30,7 +32,10 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
   // 爬虫请求 → 从后端获取文章数据
   const slug = postMatch[1];
-  const backend = context.env.API_BASE || "https://monolith-server.h005-9d9.workers.dev";
+  const backend = getBackendUrl(context.env);
+  if (!backend) {
+    return context.next();
+  }
 
   try {
     const apiRes = await fetch(`${backend}/api/posts/${slug}`, {

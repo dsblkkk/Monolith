@@ -13,7 +13,9 @@
     "build": "npm -w monolith-client run build",
     "deploy:server": "npm -w monolith-server run deploy",
     "deploy:client": "npx wrangler pages deploy client/dist",
+    "deploy:cloudflare": "node scripts/deploy-cloudflare.mjs",
     "db:migrate:local": "npm -w monolith-server run db:migrate:local",
+    "db:migrate:remote": "npm -w monolith-server run db:migrate:remote",
     "db:seed:local": "npm -w monolith-server run db:seed:local"
   },
   "devDependencies": {

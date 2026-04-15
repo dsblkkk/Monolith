@@ -146,7 +146,7 @@ function convertGhostData(raw: any): ImportResult {
       tagCount: tags.length,
       categoryCount: 0,
       commentCount: 0,
-      postTitles: posts.slice(0, 20).map((p) => ({
+      postTitles: posts.slice(0, 20).map((p: { title: string; slug: string }) => ({
         title: p.title,
         slug: p.slug,
       })),

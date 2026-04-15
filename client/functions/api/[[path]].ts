@@ -1,3 +1,9 @@
+import {
+  buildTargetUrl,
+  createApiBaseErrorResponse,
+  getBackendUrl,
+} from "../_shared";
+
 // Cloudflare Pages Function — 反向代理所有 /api/* 请求到 Workers 后端
 export const onRequest: PagesFunction<{ API_BASE: string }> = async (context) => {
   // 直接处理 CORS 预检请求，不转发
@@ -13,9 +19,14 @@ export const onRequest: PagesFunction<{ API_BASE: string }> = async (context) =>
     });
   }
 
-  const backend = context.env.API_BASE || "https://monolith-server.h005-9d9.workers.dev";
-  const url = new URL(context.request.url);
-  const target = `${backend}${url.pathname}${url.search}`;
+  const backend = getBackendUrl(context.env);
+  if (!backend) {
+    return createApiBaseErrorResponse({
+      "Access-Control-Allow-Origin": "*",
+    });
+  }
+
+  const target = buildTargetUrl(backend, context.request);
 
   const res = await fetch(target, {
     method: context.request.method,
