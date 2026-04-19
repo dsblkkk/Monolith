@@ -140,7 +140,7 @@ renderer.code = ({ text, lang }: { text: string; lang?: string }) => {
     const isHighlighted = highlightLines.has(lineNum);
 
     // diff 高亮：检测原始文本行前缀
-    const rawLine = rawLines[i] || "";
+    const rawLine = rawLines[i] || ""; // eslint-disable-line security/detect-object-injection
     let diffClass = "";
     if (isDiff) {
       if (rawLine.startsWith("+")) diffClass = " diff-add";
